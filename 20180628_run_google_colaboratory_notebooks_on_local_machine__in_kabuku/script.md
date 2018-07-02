@@ -7,10 +7,12 @@ Google Colaboratory を自分のマシンで走らせる
 
 　株式会社カブクで機械学習エンジニアのインターンでお世話になっている杉崎弘明（大学3年）です。今回はGoogle Colaboratoryのローカル実行について書きます。
 
+<img src='https://lh3.googleusercontent.com/YUwRqJGLb63Z8KOJScfd-tMOOA5G3Aw1Zd9eWmCLU0tL8fnaUeoIUlhz5ej-gvYxO9o3ozWaFO5wPVYaYnH1DOU7=s700'/>
 # 本記事の目的
 　Google Colaboratory（以降、Colaboratory）というサービスをご存知でしょうか。このサービスはGoogle Driveなどを通じてJupyter Notebooksのような環境を管理することができるサービスになります。iPython Notebook（以降ipynb）上のセルを実行するとデフォルトでGoogleが提供してくれているサーバー上で動くことになりますが、今回は手元のPCやリモートサーバ上でColaboratoryを実行していきたいとおもいます。
 　ipynbをすぐに共有できるGoogle Colaboratoryは魅力的だけどローカルにあるCPUやGPUパワーを使用したいといった際に活用できます。
-　基本的な手法はGoogle公式のページに掲載されています。https://research.google.com/colaboratory/local-runtimes.html?hl=ja
+　基本的な手法はGoogle公式のページに掲載されています。
+　https://research.google.com/colaboratory/local-runtimes.html?hl=ja
 
 # 実行環境
 今回使用したマシンは以下のような構成になっています。
@@ -240,19 +242,19 @@ $ tightvncserver -kill :1
 
 　さて、`~/.vnc/xstartup`ファイルを以下のように書き換えます。既存のものはコメントアウトして以下の内容を追記してください。
 ```
-#!/bin/sh~
+#!/bin/sh
 
-[ -x /etc/vnc/xstartup ] && exec /etc/vnc/xstartup~
-[ -r $HOME/.Xresources ] && xrdb $HOME/.Xresources~
-xsetroot -solid grey~
-vncconfig -iconic &~
-x-terminal-emulator -geometry 80x24+10+10 -ls -title "$VNCDESKTOP Desktop" &~
-x-window-manager &~
-~
-gnome-panel &~
-gnome-settings-daemon &~
-metacity &~
-nautilus &~
+[ -x /etc/vnc/xstartup ] && exec /etc/vnc/xstartup
+[ -r $HOME/.Xresources ] && xrdb $HOME/.Xresources
+xsetroot -solid grey
+vncconfig -iconic &
+x-terminal-emulator -geometry 80x24+10+10 -ls -title "$VNCDESKTOP Desktop" &
+x-window-manager &
+
+gnome-panel &
+gnome-settings-daemon &
+metacity &
+nautilus &
 ```
 
 　最後にこの設定の状態で再び起動します。
@@ -284,9 +286,10 @@ $ ssh -L locahost:55901:localhost:5901 <user>@<ip>
 　左上の「アプリケーション > システムツール > Xfce Terminal」を選択すればターミナルを開けます。
 <img src='https://lh3.googleusercontent.com/RveG9YamF2bpkPcGl-H839VQR7T3mnP_LQuWSdAdpzKzA3bhmVHFSDBmKZiZU9eXdFg-GhEgfNRzBf5j_TjrHQ=s600'/>
 
-<img src='https://lh3.googleusercontent.com/9nhqWbGlM9r5qAnBfEfRdHkvApT6lTZaqHD29moFw2ArAniw9SMzdcQeFpTDcSWEOigc5x3XYsth2xfrljY1KmLd=s600'/>
+<img src='https://lh3.googleusercontent.com/EH0ts1h6DLvbS0PQecqGHiisXlF6A02SmsEydv-TEq9clXxjnWmvCw7oJBfWokcUOUF7fY0ZdEAJ3Yg7H0zy3gi3=s600'/>
 
-　以下のようにGPIからブラウザを起動することもできます。
+
+　以下のようにGUIからブラウザを起動することもできます。
 <img src='https://lh3.googleusercontent.com/BNbSK794sdx68wIakQiHrwtsezt2b3aQdYMSXB4oDJXPS0zcHzu9SI5TsthDxRQYVOIAIa6JG40dzaRreHef3LQ=s600'/>
 
 　これ以降は通常のデスクトップと同様なので、「1. ローカルのラップトップPC(Mac)でGoogle Colaboratoryを実行」で説明した内容と同じ方法でJupyterを起動しColaboratoryと接続してください。
@@ -312,7 +315,9 @@ $ wget https://repo.anaconda.com/archive/Anaconda3-5.2.0-Linux-x86_64.sh
 $ bash Anaconda3-5.2.0-Linux-x86_64.sh
 ```
 
-公式のページは<a href="https://conda.io/docs/user-guide/install/linux.html">こちら</a>であり、そこには「設定に関してわからなければデフォルトで良い」と書いてあるので、デフォルトのままで大丈夫です。
+いくつか設定を聞かれるかもしれませんが、デフォルトのままで大丈夫です。
+公式のページは<a href="https://conda.io/docs/user-guide/install/linux.html">こちら</a>であり、
+
 
 　インストールが完了したら以下のコマンドで`python3.5.2`の環境を作ります。
 ```
@@ -321,7 +326,13 @@ $ source .bashrc
 $ conda create --name py3.5.2 python=3.5.2
 ```
 
-さらに以下のコマンドを利用すれば`python3.5.2`の環境下に入ることができます。
+このとき`conda`コマンドが見つからない場合はシェルの設定ファイル内に以下を追記してください。
+```
+export PATH="/home/<user>/anaconda3/bin:$PATH"
+```
+
+
+ここまで上手くいっていれば、以下のコマンドで`python3.5.2`の環境下に入ることができます。
 
 ```
 $ source activate py3.5.2
@@ -406,6 +417,4 @@ pc@local:$ ssh -L localhost:58888:localhost:8888 <user>@<ip>
 		- <a target="_blank" href="https://knowledgelayer.softlayer.com/learning/tightvnc-server-ubuntu-1604">TightVNC Server on Ubuntu 16.04</a>
 		- <a target="_blank" href="https://www.linode.com/docs/applications/remote-desktop/install-vnc-on-ubuntu-16-04/">Install VNC on Ubuntu 16.04</a>
 		- <a target="_blank" href="vncserver grey screen ubuntu 16.04 LTS">vnc - vncserver grey screen ubuntu 16.04 LTS - Ask Ubuntu</a>
-
-
 
