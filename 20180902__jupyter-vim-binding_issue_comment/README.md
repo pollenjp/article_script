@@ -11,5 +11,8 @@ However, you can do it like this below.
 0. Select a cell you want to paste copied ones above and then `Ctrl-v` paste cells.
 0. Finally, move to Jupyter's HOME browser tab and enable `vim-binding` nbextension. 
 
+
+[jupyter-vim-binding copy-paste ctrl-c ctrl-v - YouTube](https://youtu.be/T8dyiFILW4I)
+
 ![Alt Text](./jupyter-vim-binding_copy-paste_ctrl-c_ctrl-v.gif)
 
