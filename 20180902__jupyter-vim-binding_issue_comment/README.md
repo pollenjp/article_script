@@ -16,3 +16,6 @@ However, you can do it like this below.
 
 ![Alt Text](./jupyter-vim-binding_copy-paste_ctrl-c_ctrl-v.gif)
 
+
+[Copy-Paste cells between notebooks doesn&#39;t work in Firefox · Issue #126 · lambdalisue/jupyter-vim-binding · GitHub](https://github.com/lambdalisue/jupyter-vim-binding/issues/126#issuecomment-417932921)
+
