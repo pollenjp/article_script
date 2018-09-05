@@ -1,6 +1,7 @@
+import tensorflow as tf
 
 
-def nnPU_loss(logits, labels, positive_pct = 0.2, beta = 0., gamma = 1., nnPU = True):
+def TF_nnPU_loss(logits, labels, positive_pct = 0.2, beta = 0., gamma = 1., nnPU = True):
     """
     logits : shape (batch, 1)
     labels : shape (batch, )
@@ -25,15 +26,18 @@ def nnPU_loss(logits, labels, positive_pct = 0.2, beta = 0., gamma = 1., nnPU = 
 
     logits  = tf.reshape(tensor=logits, shape=[-1])
     y_label = tf.cast(x=tf.reshape(tensor=labels, shape=[-1]), dtype=tf.float32)
-    assert logits.shape == y_label.shape
+    #print(logits.shape)
+    #print(y_label.shape)
+    #assert logits.shape == y_label.shape
     
     bool_positive, bool_unlabeled = tf.equal(x=y_label, y=1), tf.equal(x=y_label, y=0)
 
     ##  count positive and unlabel (Only Support |P| + |U| = |X| or |U| = |X| )
     ##  y_label has 0 (Unlabel) or 1 (Positive)
-    n_positive  = tf.cast(x=tf.maximum(x=tf.reduce_sum(input_tensor=y_label), y=1), dtype=tf.float32)
+    n_positive  = tf.cast(x=tf.maximum(x=tf.reduce_sum(input_tensor=y_label), y= 1), dtype=tf.float32)
     #  n_unlabeled =  "batch" - n_positive
-    n_unlabeled = tf.subtract(x=tf.cast(x=y_label.shape[0], dtype=tf.float32), y=n_positive)
+    n_unlabeled = tf.cast(x=tf.maximum(x=tf.reduce_sum(input_tensor=y_label), y=-1), dtype=tf.float32)
+    #n_unlabeled = tf.subtract(x=tf.cast(x=y_label.shape[0], dtype=tf.float32), y=n_positive)
 
     ##________________________________________
     ##  LOSS function like "Sigmoid Loss"
@@ -73,12 +77,23 @@ def nnPU_loss(logits, labels, positive_pct = 0.2, beta = 0., gamma = 1., nnPU = 
     total_risk = tf.add( x=positive_risk, y=negative_risk )
 
     if nnPU:
-        if negative_risk < -beta:
+        #if negative_risk < -beta:
+        #    print("negative_risk < -beta:")
+        #    total_risk = tf.subtract( x=positive_risk, y=beta )
+        #    loss = -gamma * negative_risk
+        #else:
+        #    loss = total_risk
+        def manipulate1(positive_risk, beta):
             print("negative_risk < -beta:")
             total_risk = tf.subtract( x=positive_risk, y=beta )
             loss = -gamma * negative_risk
-        else:
+            return loss
+        def manipulate2(total_risk):
             loss = total_risk
+            return loss
+        loss = tf.cond( negative_risk < -beta,
+                true_fn  = lambda: manipulate1(positive_risk, beta),
+                false_fn = lambda: manipulate2(total_risk) )
     else:
         loss = total_risk
 
