@@ -20,23 +20,28 @@ def TF_nnPU_loss(logits, labels, positive_pct = 0.2, beta = 0., gamma = 1., nnPU
         - https://github.com/kiryor/nnPUlearning/blob/master/pu_loss.py
     """
     assert (positive_pct > 0) and (positive_pct < 1)
+    positive_label = 1
+    unlabeled_label = -1
     #________________________________________________________________________________
     ##      
     loss_func = lambda x: tf.sigmoid(x=x)  # sigmoid: y = 1 / (1 + exp(-x))
 
     logits  = tf.reshape(tensor=logits, shape=[-1])
-    y_label = tf.cast(x=tf.reshape(tensor=labels, shape=[-1]), dtype=tf.float32)
-    #print(logits.shape)
-    #print(y_label.shape)
+    y_label = tf.cast(x=tf.reshape(tensor=labels, shape=[-1]), dtype=logits.dtype)
+    print(logits.get_shape())
+    print(y_label.shape)
     #assert logits.shape == y_label.shape
+    logits.get_shape().assert_is_compatible_with(other=y_label.get_shape())
     
-    bool_positive, bool_unlabeled = tf.equal(x=y_label, y=1), tf.equal(x=y_label, y=0)
+    bool_positive, bool_unlabeled = tf.equal(x=y_label, y=positive_label), tf.equal(x=y_label, y=unlabeled_label)
+    print(bool_positive.dtype)
+    print(tf.cast(bool_positive, dtype=logits.dtype))
 
     ##  count positive and unlabel (Only Support |P| + |U| = |X| or |U| = |X| )
     ##  y_label has 0 (Unlabel) or 1 (Positive)
-    n_positive  = tf.cast(x=tf.maximum(x=tf.reduce_sum(input_tensor=y_label), y= 1), dtype=tf.float32)
+    n_positive  = tf.cast(x=tf.maximum(x=tf.reduce_sum(input_tensor=y_label), y=positive_label), dtype=tf.float32)
     #  n_unlabeled =  "batch" - n_positive
-    n_unlabeled = tf.cast(x=tf.maximum(x=tf.reduce_sum(input_tensor=y_label), y=-1), dtype=tf.float32)
+    n_unlabeled = tf.cast(x=tf.maximum(x=tf.reduce_sum(input_tensor=y_label), y=unlabeled_label), dtype=tf.float32)
     #n_unlabeled = tf.subtract(x=tf.cast(x=y_label.shape[0], dtype=tf.float32), y=n_positive)
 
     ##________________________________________
@@ -50,51 +55,42 @@ def TF_nnPU_loss(logits, labels, positive_pct = 0.2, beta = 0., gamma = 1., nnPU
     ##________________________________________
 
 
-    ##________________________________________
-    ##  Compute Emperical Risk (経験損失)
-    ##________________________________________
-    ##  Use Only TensorFrow Operator for Automatic differentiation
-    ###____________________
-    ###  sum(positive_pct * bool_positive / n_positive * positive_loss)
-    positive_risk = tf.reduce_sum(
-        input_tensor=tf.multiply(
-            x=tf.divide(x=tf.multiply(x=positive_pct,
-                                      y=tf.cast(x=bool_positive, dtype=tf.float32)),
-                        y=n_positive),
-            y=positive_loss), axis=None)
-    ###____________________
-    ###  sum((bool_unlabeled / n_unlabeled - positive_pct * bool_positive / n_positive) * unlabeled_loss)
-    negative_risk = tf.reduce_sum(
-        input_tensor=tf.multiply(
-            x=tf.subtract(x=tf.divide(x=tf.cast(x=bool_unlabeled, dtype=tf.float32),
-                                      y=n_unlabeled),
-                          y=tf.divide(x=tf.multiply(x=positive_pct,
-                                                    y=tf.cast(x=bool_positive, dtype=tf.float32)),
-                                      y=tf.cast(n_positive, dtype=tf.float32))),
-            y=unlabeled_loss), axis=None)
-    #________________________________________
+    with tf.name_scope(name="Compute_Emperical_Risk"):
+        ##------------------------------------------------------------
+        ##  Compute Emperical Risk (経験損失)
+        ##    - Use Only TensorFrow Operator for Automatic differentiation
+        ##    - +,-,*,/ python operator are translated to TensorFlow operator
+        ##      - https://stackoverflow.com/a/37901852/9316234
+        ###----------------------------------------
+        ###  sum(positive_pct * bool_positive / n_positive * positive_loss)
+        positive_risk = tf.reduce_sum( input_tensor = positive_pct * tf.cast(x=bool_positive, dtype=tf.float32)
+                                                      / n_positive * positive_loss, axis=None)
+        ###----------------------------------------
+        ###  sum((bool_unlabeled / n_unlabeled - positive_pct * bool_positive / n_positive) * unlabeled_loss)
+        negative_risk = tf.reduce_sum(
+                input_tensor = ( tf.cast(x=bool_unlabeled, dtype=tf.float32) / n_unlabeled
+                                 - positive_pct * tf.cast(x=bool_positive, dtype=tf.float32)
+                                 / tf.cast(n_positive, dtype=tf.float32)
+                               ) * unlabeled_loss, axis=None)
+        ###----------------------------------------
 
-    total_risk = tf.add( x=positive_risk, y=negative_risk )
+        total_risk = positive_risk + negative_risk
 
-    if nnPU:
-        #if negative_risk < -beta:
-        #    print("negative_risk < -beta:")
-        #    total_risk = tf.subtract( x=positive_risk, y=beta )
-        #    loss = -gamma * negative_risk
-        #else:
-        #    loss = total_risk
-        def manipulate1(positive_risk, beta):
-            print("negative_risk < -beta:")
-            total_risk = tf.subtract( x=positive_risk, y=beta )
-            loss = -gamma * negative_risk
-            return loss
-        def manipulate2(total_risk):
-            loss = total_risk
-            return loss
-        loss = tf.cond( negative_risk < -beta,
-                true_fn  = lambda: manipulate1(positive_risk, beta),
-                false_fn = lambda: manipulate2(total_risk) )
-    else:
+    with tf.name_scope(name="nnPU_uPU"):
+        if nnPU:
+            def manipulate1(total_risk, positive_risk, beta):
+                """negative_risk < -beta"""
+                total_risk = tf.subtract( x=positive_risk, y=beta )
+                x_out = -gamma * negative_risk
+                return total_risk, x_out
+            def manipulate2(total_risk):
+                x_out = total_risk
+                return total_risk, x_out
+            total_risk, x_out = tf.cond(negative_risk < -beta,
+                                        true_fn  = lambda: manipulate1(total_risk, positive_risk, beta),
+                                        false_fn = lambda: manipulate2(total_risk) )
+        else:
+            x_out = total_risk
         loss = total_risk
 
     return loss
