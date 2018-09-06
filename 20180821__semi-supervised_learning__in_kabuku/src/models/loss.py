@@ -24,7 +24,7 @@ def TF_nnPU_loss(logits, labels, positive_pct = 0.2, beta = 0., gamma = 1., nnPU
     unlabeled_label = -1
     #________________________________________________________________________________
     ##      
-    loss_func = lambda x: tf.sigmoid(x=x)  # sigmoid: y = 1 / (1 + exp(-x))
+    loss_func = lambda x: tf.sigmoid(x=-x)  # sigmoid: y = 1 / (1 + exp(-x))
 
     logits  = tf.reshape(tensor=logits, shape=[-1])
     y_label = tf.cast(x=tf.reshape(tensor=labels, shape=[-1]), dtype=logits.dtype)
@@ -39,9 +39,12 @@ def TF_nnPU_loss(logits, labels, positive_pct = 0.2, beta = 0., gamma = 1., nnPU
 
     ##  count positive and unlabel (Only Support |P| + |U| = |X| or |U| = |X| )
     ##  y_label has 0 (Unlabel) or 1 (Positive)
-    n_positive  = tf.cast(x=tf.maximum(x=tf.reduce_sum(input_tensor=y_label), y=positive_label), dtype=tf.float32)
+    n_positive  = tf.maximum(x=tf.reduce_sum(input_tensor=tf.cast(x=bool_positive, dtype=tf.float32)),
+                             y=positive_label)
     #  n_unlabeled =  "batch" - n_positive
     n_unlabeled = tf.cast(x=tf.maximum(x=tf.reduce_sum(input_tensor=y_label), y=unlabeled_label), dtype=tf.float32)
+    n_unlabeled  = tf.maximum(x=tf.reduce_sum(input_tensor=tf.cast(x=bool_unlabeled, dtype=tf.float32)),
+                              y=positive_label)
     #n_unlabeled = tf.subtract(x=tf.cast(x=y_label.shape[0], dtype=tf.float32), y=n_positive)
 
     ##________________________________________
@@ -69,9 +72,9 @@ def TF_nnPU_loss(logits, labels, positive_pct = 0.2, beta = 0., gamma = 1., nnPU
         ###  sum((bool_unlabeled / n_unlabeled - positive_pct * bool_positive / n_positive) * unlabeled_loss)
         negative_risk = tf.reduce_sum(
                 input_tensor = ( tf.cast(x=bool_unlabeled, dtype=tf.float32) / n_unlabeled
-                                 - positive_pct * tf.cast(x=bool_positive, dtype=tf.float32)
-                                 / tf.cast(n_positive, dtype=tf.float32)
-                               ) * unlabeled_loss, axis=None)
+                                 - positive_pct * tf.cast(x=bool_positive, dtype=tf.float32) / n_positive
+                               ) * unlabeled_loss,
+                axis=None)
         ###----------------------------------------
 
         total_risk = positive_risk + negative_risk
@@ -82,6 +85,7 @@ def TF_nnPU_loss(logits, labels, positive_pct = 0.2, beta = 0., gamma = 1., nnPU
                 """negative_risk < -beta"""
                 total_risk = tf.subtract( x=positive_risk, y=beta )
                 x_out = -gamma * negative_risk
+                #total_risk = -gamma * negative_risk
                 return total_risk, x_out
             def manipulate2(total_risk):
                 x_out = total_risk
