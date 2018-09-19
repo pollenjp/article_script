@@ -1,0 +1,31 @@
+
+- `TensorFlow__MLP_Ladder-Network_MNIST-labeled100__rinuboney.ipynb`
+  - rinuboney さんのコードを動くように修正し、ipynb上で実行
+  - MNIST
+    - train: 60000
+      - labeled : 100
+      - unlabeled : 59900
+    - test : 10000
+- `TensorFlow__MLP_Ladder-Network_MNIST-labeled100__pollenjp.ipynb`
+  - rinuboney さんのコードを元にところどころ修正を加えたipynb
+  - MNIST
+    - train: 60000
+      - labeled : 100
+      - unlabeled : 59900
+    - test : 10000
+- `TensorFlow__MLP_MNIST-labeled100__pollenjp.ipynb`
+  - 単純なMLP
+  - MNIST
+    - train: 60000
+      - labeled : 100
+      - unlabeled : 59900
+    - test : 10000
+- `TensorFlow__MLP_MNIST-labeled60000__pollenjp.ipynb`
+  - 単純なMLP
+  - MNIST
+    - train: 60000
+      - labeled : 60000
+      - unlabeled : 0
+    - test : 10000
+
+
