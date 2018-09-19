@@ -217,8 +217,14 @@ def read_data_sets(train_dir, n_labeled=100, fake_data=False, one_hot=False):
   train_images = train_images[VALIDATION_SIZE:]
   train_labels = train_labels[VALIDATION_SIZE:]
 
-  data_sets.train = SemiDataSet(train_images, train_labels, n_labeled)
-  data_sets.validation = DataSet(validation_images, validation_labels)
-  data_sets.test = DataSet(test_images, test_labels)
+  data_sets.train      = (train_images, train_labels)
+  data_sets.validation = (validation_images, validation_labels)
+  data_sets.test       = (test_images, test_labels)
+
+  data_sets.semi_train      = SemiDataSet(images=train_images, labels=train_labels, n_labeled=n_labeled)
+  data_sets.semi_validation = DataSet(images=validation_images, labels=validation_labels, fake_data=False)
+  data_sets.semi_test       = DataSet(images=test_images, labels=test_labels, fake_data=False)
 
   return data_sets
+
+
