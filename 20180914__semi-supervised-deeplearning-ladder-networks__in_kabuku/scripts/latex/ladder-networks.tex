@@ -1,0 +1,45 @@
+%  ref
+%    - https://arxiv.org/abs/1709.06005
+%    - https://togetter.com/li/761383
+%    - https://texwiki.texjp.org/?TikZ#c4bd1edb
+
+\documentclass[dvipdfmx]{jsarticle}% 適切なドライバ指定が必要
+\usepackage[svgnames]{xcolor}% tikzより前に読み込む必要あり
+\usepackage{tikz}
+\usepackage{tikz-network}
+
+\usepackage{amsmath}
+
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{tikzpicture}
+\Vertex{A}
+\Vertex[x=1,y=1]{B}
+\Vertex[x=2]{C}
+\Vertex[x=15]{D}
+\Vertex[x=3, Math, label=\tilde{3}]{D}
+\end{tikzpicture}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%  Complex Networks
+%    - 3.1 Vertices
+
+\begin{tikzpicture}
+%\Vertices[Math]{data/vertices.csv} % 何故か\tildeが反応しない
+\Vertex[x=0, y=0, shape=circle   , label=$\boldsymbol{x}$]{x}
+\Vertex[x=0, y=1, shape=rectangle, label=$\boldsymbol{\tilde{z}^{(0)}}$]{tilde_z_0}
+\Vertex[x=0, y=2, shape=rectangle, label=$\boldsymbol{\tilde{z}^{(1)}}$]{tilde_z_1}
+\end{tikzpicture}
+
+%    - 3.2 Edges
+
+\begin{tikzpicture}
+%s\Vertices{data/vertices.csv}
+%\Edges{data/edges.csv}
+\end{tikzpicture}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{document}
