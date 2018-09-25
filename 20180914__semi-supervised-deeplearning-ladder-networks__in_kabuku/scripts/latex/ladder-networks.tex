@@ -14,30 +14,218 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{tikzpicture}
-\Vertex{A}
-\Vertex[x=1,y=1]{B}
-\Vertex[x=2]{C}
-\Vertex[x=15]{D}
-\Vertex[x=3, Math, label=\tilde{3}]{D}
-\end{tikzpicture}
+\tikzstyle{inout}=[circle,   draw=blue!50, fill=blue!20, thick, inner sep=0pt,minimum size=6mm]
+\tikzstyle{layer}=[rectangle,draw=black!50,fill=black!20,thick, inner sep=0pt,minimum size=4mm]
+\tikzstyle{pre} =[<-,shorten <=1pt,>=stealth,semithick]
+\tikzstyle{post}=[->,shorten >=1pt,>=stealth,semithick]
+\begin{tikzpicture}[align=center]
+	\tikzstyle{every label}=[red]
+	\tikzstyle{every node}=[font=\scriptsize]
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%  Complex Networks
-%    - 3.1 Vertices
+	\node[inout] (input_x)                        {$x$};
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%  Corrupted Encoder
+	\node[] at (0, -1) {Corrupted Encoder};
+	%
+	\node at (0,1) [layer] (tilde_z_0) {$\boldsymbol{\tilde{z}}^{(0)} = \boldsymbol{x} + noise $};
+	\draw [->] (input_x) to (tilde_z_0);
+	\node at (0,2) [layer] (tilde_h_0) {$\boldsymbol{\tilde{h}}^{(0)} = \boldsymbol{\tilde{z}}^{(0)}$};
+	\draw [->] (tilde_z_0) to (tilde_h_0);
+	\draw[thick] (-2.4,0.6)--(2.4,0.6)--(2.4,2.4)--(-2.4,2.4)-- cycle;
+	%
+	\node at (0,3)[layer] (tilde_z_1) {$\boldsymbol{\tilde{z}}^{(1)} = N_B( \boldsymbol{W}^{(1)}
+																				\cdot	 \boldsymbol{\tilde{h}}^{(0)} ) + noise$};
+	\draw [->] (tilde_h_0) to (tilde_z_1);
+	\node at (0,4)[layer] (tilde_h_1) {$\boldsymbol{\tilde{h}}^{(1)} = ACT\left( \boldsymbol{\gamma}^{(1)} \odot \left(
+																				\boldsymbol{\tilde{z}}^{(1)} + \boldsymbol{\beta}^{(1)}\right)\right) $};
+	\draw [->] (tilde_z_1) to (tilde_h_1);
+	\draw[thick] (-2.4,2.6)--(2.4,2.6)--(2.4,4.4)--(-2.4,4.4)-- cycle;
+	%
+	\node at (0,5)[layer] (tilde_z_2) {$\boldsymbol{\tilde{z}}^{(2)} = N_B\left( \boldsymbol{W}^{(2)}
+																				\cdot	 \boldsymbol{\tilde{h}}^{(1)} \right) + noise$};
+	\draw [->] (tilde_h_1) to (tilde_z_2);
+	\node at (0,6)[layer] (tilde_h_2) {$\boldsymbol{\tilde{h}}^{(2)} = ACT \left( \boldsymbol{\gamma}^{(2)} \odot \left(
+																				\boldsymbol{\tilde{z}}^{(2)} + \boldsymbol{\beta}^{(2)} \right) \right) $};
+	\draw [->] (tilde_z_2) to (tilde_h_2);
+	\draw[thick] (-2.4,4.6)--(2.4,4.6)--(2.4,6.4)--(-2.4,6.4)-- cycle;
+	%
+	\node at (0,7)[layer] (tilde_z_3) {$\boldsymbol{\tilde{z}}^{(3)} = N_B \left( \boldsymbol{W}^{(3)}
+																				\cdot	 \boldsymbol{\tilde{h}}^{(2)} \right) + noise$};
+	\draw [->] (tilde_h_2) to (tilde_z_3);
+	\node at (0,8)[layer] (tilde_h_3) {$\boldsymbol{\tilde{h}}^{(3)} = ACT\left( \boldsymbol{\gamma}^{(3)} \odot \left(
+																				\boldsymbol{\tilde{z}}^{(3)} + \boldsymbol{\beta}^{(3)}\right)\right) $};
+	\draw [->] (tilde_z_3) to (tilde_h_3);
+	\draw[thick] (-2.4,6.6)--(2.4,6.6)--(2.4,8.4)--(-2.4,8.4)-- cycle;
+	%
+	\node at (0,9)[layer] (tilde_z_4) {$\boldsymbol{\tilde{z}}^{(4)} = N_B\left( \boldsymbol{W}^{(4)}
+																				\cdot	 \boldsymbol{\tilde{h}}^{(3)} \right) + noise$};
+	\draw [->] (tilde_h_3) to (tilde_z_4);
+	\node at (0,10)[layer] (tilde_h_4) {$\boldsymbol{\tilde{h}}^{(4)} = ACT\left( \boldsymbol{\gamma}^{(4)} \odot \left(
+																				\boldsymbol{\tilde{z}}^{(4)} + \boldsymbol{\beta}^{(4)}\right)\right) $};
+	\draw [->] (tilde_z_4) to (tilde_h_4);
+	\draw[thick] (-2.4,8.6)--(2.4,8.6)--(2.4,10.4)--(-2.4,10.4)-- cycle;
+	%
+	\node at (0,11)[layer] (tilde_z_5) {$\boldsymbol{\tilde{z}}^{(5)} = N_B\left( \boldsymbol{W}^{(5)}
+																				\cdot	 \boldsymbol{\tilde{h}}^{(4)} \right) + noise$};
+	\draw [->] (tilde_h_4) to (tilde_z_5);
+	\node at (0,12)[layer] (tilde_h_5) {$\boldsymbol{\tilde{h}}^{(5)} = ACT\left( \boldsymbol{\gamma}^{(5)} \odot \left(
+																				\boldsymbol{\tilde{z}}^{(5)} + \boldsymbol{\beta}^{(5)}\right)\right) $};
+	\draw [->] (tilde_z_5) to (tilde_h_5);
+	\draw[thick] (-2.4,10.6)--(2.4,10.6)--(2.4,12.4)--(-2.4,12.4)-- cycle;
+	%
+	\node at (0,13) [layer] (P_tilde_y) {$P(\boldsymbol{\tilde{y}} | \boldsymbol{x}) = \boldsymbol{\tilde{h}}^{(5)}$};
+	\draw [->] (tilde_h_5) to (P_tilde_y);
+	%
+	\node at (0,14) [inout] (tilde_y) {$\boldsymbol{\tilde{y}}$};
+	\draw [->] (P_tilde_y) to (tilde_y);
 
-\begin{tikzpicture}
-%\Vertices[Math]{data/vertices.csv} % 何故か\tildeが反応しない
-\Vertex[x=0, y=0, shape=circle   , label=$\boldsymbol{x}$]{x}
-\Vertex[x=0, y=1, shape=rectangle, label=$\boldsymbol{\tilde{z}^{(0)}}$]{tilde_z_0}
-\Vertex[x=0, y=2, shape=rectangle, label=$\boldsymbol{\tilde{z}^{(1)}}$]{tilde_z_1}
-\end{tikzpicture}
-
-%    - 3.2 Edges
-
-\begin{tikzpicture}
-%s\Vertices{data/vertices.csv}
-%\Edges{data/edges.csv}
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%  Decoder
+	\node[] at (5, -1) {Decoder};
+	%
+	\node at (5, 11.5) [layer] (hat_z_5) {
+		$\boldsymbol{u^{(5)}} = N_B\left(\boldsymbol{\tilde{h}}^{(5)}\right)$\\
+		$\boldsymbol{\hat{z}_{1}^{(5)}} = g\left( \textcolor{blue}{\boldsymbol{\tilde{z}}^{(5)}},
+																								\boldsymbol{u^{(5)}} \right)$\\
+		$\boldsymbol{\hat{z}_{i,BN}^{(5)}} = \frac{\boldsymbol{\hat{z}_{i}^{(5)}} - \textcolor{red}{\mu_{i}^{(5)}}}
+			{\textcolor{red}{\sigma_{i}^{(5)}}}$ };
+	\draw [->] (P_tilde_y.east) -- (5, 13) -- (hat_z_5);
+	\draw [->, blue, line width=0.25mm] (tilde_z_5.east) -- (3.5, 11);
+	\node at (5, 9.5) [layer] (hat_z_4) {
+		$\boldsymbol{u^{(4)}} = N_B\left(\boldsymbol{V}^{(5)} \cdot \boldsymbol{\hat{z}}^{(5)} \right)$\\
+		$\boldsymbol{\hat{z}_{1}^{(4)}} = g\left( \textcolor{blue}{\boldsymbol{\tilde{z}}^{(4)}},
+																								\boldsymbol{u^{(4)}} \right)$\\
+		$\boldsymbol{\hat{z}_{i,BN}^{(4)}} = \frac{\boldsymbol{\hat{z}_{i}^{(4)}} - \textcolor{red}{\mu_{i}^{(4)}}}
+			{\textcolor{red}{\sigma_{i}^{(4)}}}$ };
+	\draw [->] (hat_z_5) to (hat_z_4);
+	\draw [->, blue, line width=0.25mm] (tilde_z_4.east) -- (3.5, 9);
+	\node at (5, 7.5) [layer] (hat_z_3) {
+		$\boldsymbol{u^{(3)}} = N_B\left(\boldsymbol{V}^{(4)} \cdot \boldsymbol{\hat{z}}^{(4)} \right)$\\
+		$\boldsymbol{\hat{z}_{1}^{(3)}} = g\left( \textcolor{blue}{\boldsymbol{\tilde{z}}^{(3)}},
+																								\boldsymbol{u^{(3)}} \right)$\\
+		$\boldsymbol{\hat{z}_{i,BN}^{(3)}} = \frac{\boldsymbol{\hat{z}_{i}^{(3)}} - \textcolor{red}{\mu_{i}^{(3)}}}
+			{\textcolor{red}{\sigma_{i}^{(3)}}}$ };
+	\draw [->] (hat_z_4) to (hat_z_3);
+	\draw [->, blue, line width=0.25mm] (tilde_z_3.east) -- (3.5, 7);
+	\node at (5, 5.5) [layer] (hat_z_2) {
+		$\boldsymbol{u^{(2)}} = N_B\left(\boldsymbol{V}^{(3)} \cdot \boldsymbol{\hat{z}}^{(3)} \right)$\\
+		$\boldsymbol{\hat{z}_{1}^{(2)}} = g\left( \textcolor{blue}{\boldsymbol{\tilde{z}}^{(2)}},
+																								\boldsymbol{u^{(2)}} \right)$\\
+		$\boldsymbol{\hat{z}_{i,BN}^{(2)}} = \frac{\boldsymbol{\hat{z}_{i}^{(2)}} - \textcolor{red}{\mu_{i}^{(2)}}}
+			{\textcolor{red}{\sigma_{i}^{(2)}}}$ };
+	\draw [->] (hat_z_3) to (hat_z_2);
+	\draw [->, blue, line width=0.25mm] (tilde_z_2.east) -- (3.5, 5);
+	\node at (5, 3.5) [layer] (hat_z_1) {
+		$\boldsymbol{u^{(1)}} = N_B\left(\boldsymbol{V}^{(2)} \cdot \boldsymbol{\hat{z}}^{(2)} \right)$\\
+		$\boldsymbol{\hat{z}_{1}^{(1)}} = g\left( \textcolor{blue}{\boldsymbol{\tilde{z}}^{(1)}},
+																								\boldsymbol{u^{(1)}} \right)$\\
+		$\boldsymbol{\hat{z}_{i,BN}^{(1)}} = \frac{\boldsymbol{\hat{z}_{i}^{(1)}} - \textcolor{red}{\mu_{i}^{(1)}}}
+			{\textcolor{red}{\sigma_{i}^{(1)}}}$ };
+	\draw [->] (hat_z_2) to (hat_z_1);
+	\draw [->, blue, line width=0.25mm] (tilde_z_1.east) -- (3.5, 3);
+	\node at (5, 1.5) [layer] (hat_z_0) {
+		$\boldsymbol{u^{(0)}} = N_B\left(\boldsymbol{V}^{(1)} \cdot \boldsymbol{\hat{z}}^{(1)} \right)$\\
+		$\boldsymbol{\hat{z}_{0}^{(0)}} = g\left( \textcolor{blue}{\boldsymbol{\tilde{z}}^{(0)}},
+																								\boldsymbol{u^{(0)}} \right)$\\
+		$\boldsymbol{\hat{z}_{i,BN}^{(0)}} = \frac{\boldsymbol{\hat{z}_{i}^{(0)}} - \textcolor{red}{\mu_{i}^{(0)}} }
+			{\textcolor{red}{\sigma_{i}^{(0)} } }$ };
+	\draw [->] (hat_z_1) to (hat_z_0);
+	\draw [->, blue, line width=0.25mm] (tilde_z_0.east) -- (3.5, 1);
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%  Clean Encoder
+	\node[] at (10, -1) {Clean Encoder};
+	%
+	\node at (10,1) [layer] (z_0) {$\boldsymbol{z}^{(0)} = \boldsymbol{x} + noise $};
+	\draw [->] (input_x) -- (10, 0) -- (z_0.south);
+	\node at (10,2) [layer] (h_0) {$\boldsymbol{\tilde{h}}^{(0)} = \boldsymbol{z}^{(0)}$};
+	\draw [->] (z_0) to (h_0);
+	\draw[thick] (7.6,0.6)--(12.4,0.6)--(12.4,2.4)--(7.6,2.4)-- cycle;
+	\node[] at (7,1.7) {$C_d^{(0)}$};
+	\draw [->, red, line width=0.25mm] (z_0.west) -- (6.6, 1);
+	\draw [black, line width=0.5mm, dotted] (hat_z_0.east) -- (z_0.west);
+	%
+	\node at (10,3.1)[layer] (z_1) {
+		$\boldsymbol{z}_{pre}^{(1)} = \boldsymbol{W}^{(1)} \cdot	 \boldsymbol{h}^{(0)} $\\
+		$\boldsymbol{z}^{(1)} = N_B \left( \boldsymbol{z}_{pre}^{(1)} \right) $};
+	\draw [->] (h_0) to (z_1);
+	\node at (10,4)[layer] (h_1) {$\boldsymbol{h}^{(1)} = ACT\left( \boldsymbol{\gamma}^{(1)} \odot \left(
+																		\boldsymbol{z}^{(1)} + \boldsymbol{\beta}^{(1)}\right)\right) $};
+	\draw [->] (z_1) to (h_1);
+	\draw[thick] (7.6,2.6)--(12.4,2.6)--(12.4,4.4)--(7.6,4.4)-- cycle;
+	\node[] at (7,3.7) {$C_d^{(1)}$};
+	\draw [->, red, line width=0.25mm] (z_1.west) -- (6.6, 3);
+	\draw [black, line width=0.5mm, dotted] (hat_z_1.east) -- (z_1.west);
+	%
+	\node at (10,5)[layer] (z_2) {
+		$\boldsymbol{z}_{pre}^{(2)} = \boldsymbol{W}^{(2)} \cdot	 \boldsymbol{h}^{(1)} $\\
+		$\boldsymbol{z}^{(2)} = N_B \left( \boldsymbol{z}_{pre}^{(2)} \right) $};
+	\draw [->] (h_1) to (z_2);
+	\node at (10,6)[layer] (h_2) {$\boldsymbol{h}^{(2)} = ACT \left( \boldsymbol{\gamma}^{(2)} \odot \left(
+																				\boldsymbol{z}{(2)} + \boldsymbol{\beta}^{(2)} \right) \right) $};
+	\draw [->] (z_2) to (h_2);
+	\draw[thick] (7.6,4.6)--(12.4,4.6)--(12.4,6.4)--(7.6,6.4)-- cycle;
+	\node[] at (7,5.7) {$C_d^{(2)}$};
+	\draw [->, red, line width=0.25mm] (z_2.west) -- (6.6, 5);
+	\draw [black, line width=0.5mm, dotted] (hat_z_2.east) -- (z_2.west);
+	%
+	\node at (10,7)[layer] (z_3) {
+		$\boldsymbol{z}_{pre}^{(3)} = \boldsymbol{W}^{(3)} \cdot	 \boldsymbol{h}^{(2)} $\\
+		$\boldsymbol{z}^{(3)} = N_B \left( \boldsymbol{z}_{pre}^{(3)} \right) $};
+	\draw [->] (h_2) to (z_3);
+	\node at (10,8)[layer] (h_3) {$\boldsymbol{h}^{(3)} = ACT\left( \boldsymbol{\gamma}^{(3)} \odot \left(
+																				\boldsymbol{z}^{(3)} + \boldsymbol{\beta}^{(3)}\right)\right) $};
+	\draw [->] (z_3) to (h_3);
+	\draw[thick] (7.6,6.6)--(12.4,6.6)--(12.4,8.4)--(7.6,8.4)-- cycle;
+	\node[] at (7, 7.7) {$C_d^{(3)}$};
+	\draw [->, red, line width=0.25mm] (z_3.west) -- (6.6, 7);
+	\draw [black, line width=0.5mm, dotted] (hat_z_3.east) -- (z_3.west);
+	%
+	\node at (10,9)[layer] (z_4) {
+		$\boldsymbol{z}_{pre}^{(4)} = \boldsymbol{W}^{(4)} \cdot	 \boldsymbol{h}^{(3)} $\\
+		$\boldsymbol{z}^{(4)} = N_B \left( \boldsymbol{z}_{pre}^{(4)} \right) $};
+	\draw [->] (h_3) to (z_4);
+	\node at (10,10)[layer] (h_4) {$\boldsymbol{h}^{(4)} = ACT\left( \boldsymbol{\gamma}^{(4)} \odot \left(
+																				\boldsymbol{z}^{(4)} + \boldsymbol{\beta}^{(4)}\right)\right) $};
+	\draw [->] (z_4) to (h_4);
+	\draw[thick] (7.6,8.6)--(12.4,8.6)--(12.4,10.4)--(7.6,10.4)-- cycle;
+	\node[] at (7, 9.7) {$C_d^{(4)}$};
+	\draw [->, red, line width=0.25mm] (z_4.west) -- (6.6, 9);
+	\draw [black, line width=0.5mm, dotted] (hat_z_4.east) -- (z_4.west);
+	%
+	\node at (10,11)[layer] (z_5) {
+		$\boldsymbol{z}_{pre}^{(5)} = \boldsymbol{W}^{(5)} \cdot	 \boldsymbol{h}^{(4)} $\\
+		$\boldsymbol{z}^{(5)} = N_B \left( \boldsymbol{z}_{pre}^{(5)} \right) $};
+	\draw [->] (h_4) to (z_5);
+	\node at (10,12)[layer] (h_5) {$\boldsymbol{h}^{(5)} = ACT\left( \boldsymbol{\gamma}^{(5)} \odot \left(
+																				\boldsymbol{z}^{(5)} + \boldsymbol{\beta}^{(5)}\right)\right) $};
+	\draw [->] (z_5) to (h_5);
+	\draw[thick] (7.6,10.6)--(12.4,10.6)--(12.4,12.4)--(7.6,12.4)-- cycle;
+	\node[] at (7, 11.7) {$C_d^{(5)}$};
+	\draw [->, red, line width=0.25mm] (z_5.west) -- (6.6, 11);
+	\draw [black, line width=0.5mm, dotted] (hat_z_5.east) -- (z_5.west);
+	%
+	\node at (10,13) [layer] (P_y) {$P(\boldsymbol{y} | \boldsymbol{x}) = \boldsymbol{h}^{(5)}$};
+	\draw [->] (h_5) to (P_y);
+	%
+	\node at (10,14) [inout] (y) {$\boldsymbol{y}$};
+	\draw [->] (P_y) to (y);
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%  Cost
+	\node[] at (5, -3) {
+		$\boldsymbol{\mu}^{(l)} = batchmean \left( \boldsymbol{z}_{pre}^{(l)} \right) $ \\
+		$\boldsymbol{\sigma}^{(l)} = batchstd \left( \boldsymbol{z}_{pre}^{(l)} \right) $ \\
+		$ \hat{z}_i^{(l)} = g_i \left( \tilde{z}_i^{(l)}, u_i^{(l)} \right)
+					= \left( \tilde{z}_i^{(l)} - \mu_i \left( u_i^{(l)} \right) \right)
+						\cdot v_i \left( u_i^{(l)} \right) + \mu_i \left( u_i^{(l)} \right) $ \\
+		$ \mu_i \left( u_i^{(l)} \right) = a_{1, i}^{(l)} \cdot sigmoid \left(
+						a_{2,i}^{(l)} \cdot u_i^{(l)} + a_{3,i}^{(l)} \right) + a_{4,i}^{(l)} \cdot u_i^{(l)} + a_{5,i}^{(l)} $ \\
+		$ v_i \left( u_i^{(l)} \right) = a_{6, i}^{(l)} \cdot sigmoid \left(
+						a_{7,i}^{(l)} \cdot u_i^{(l)} + a_{8,i}^{(l)} \right) + a_{9,i}^{(l)} \cdot u_i^{(l)} + a_{10,i}^{(l)} $ \\
+		$C_d	= \sum\limits_{l=0}^{L} C_d^{(l)}
+					= \sum\limits_{l=0}^{L} || \boldsymbol{z}^{(l)} - \boldsymbol{\hat{z}}_{BN}^{(l)} ||^2 $
+	};
 \end{tikzpicture}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
