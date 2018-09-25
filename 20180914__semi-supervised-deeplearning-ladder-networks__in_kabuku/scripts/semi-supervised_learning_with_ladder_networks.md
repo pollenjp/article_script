@@ -101,8 +101,9 @@ $$ C_d^{(l)} = || \hat{z}^{(l)} - z^{(l)} ||^2 $$
 
 <img src='https://lh3.googleusercontent.com/Il6k6riq8ZB3GYxi4XBn80U55v2DmAKL5YCXHJgOu60ptrhs7KVaGtUUMxj17BKnRL3dvPFRNUKa4eIuSVH40j0=s800'/>
 
+
 [下図の拡大図](https://github.com/pollenjp/article_script/blob/master/20180914__semi-supervised-deeplearning-ladder-networks__in_kabuku/scripts/latex/ladder-networks.pdf)
-<img src='https://lh3.googleusercontent.com/B_mC3O8TTjiG09h9WsvtA9I-qDoJy_AHHeEgqdQ3rJZnL9fgh9GRtnMgp2mHIGafc7B5VQh85QhihbaJJ7M0GcY=s1200'/>
+<img src='https://lh3.googleusercontent.com/_X0wZ6Y5R1b614bkY0MWA6MGz-MnZQCmsGTBLUlRICOoLVwhMfNhCeY3kWfIvthr0BdDXR1Ww6ua1bWGdLKMMfj7=s1200'/>
 
 
 モデルは上図におけるCorrupted Encoder, Clean Encoder, Decoderの３種類の多層レイヤから成ります。Forwardの計算式は図に書いてあるとおりです。式中の\\(ACT\\),\\(B_N\\)はそれぞれ活性化関数、バッチ標準化処理を表しています。コード中ではrelu関数を活性化関数として用いています。
@@ -112,7 +113,7 @@ $$ C_c = - \frac{1}{N} \sum_{n=1}^{N} \log P \left( \boldsymbol{\tilde{y}} = t(n
 $$ C_d = \sum_{l=0}^{L} \lambda_l C_d^{(l)} = \sum_{l=0}^{L} \frac{\lambda_l}{N_{ml}}  \sum_{n=1}^{N} || \boldsymbol{z}^{(l)}(n) - \boldsymbol{\hat{z}}_{BN}^{(l)}(n) ||^2 $$
 $$ C   = C_c + C_d $$
 
-\\(C_c\\)の箇所はCorrupted Encoderの出力のコスト関数で正解ラベル$t(n)$を用いていることからわかるようにこれらはラベル有りデータが入力されたときに使われます。
+\\(C_c\\)の箇所はCorrupted Encoderの出力のコスト関数で正解ラベル\\(t(n)\\)を用いていることからわかるようにこれらはラベル有りデータが入力されたときに使われます。
 \\(C_d\\)はDecoderのコスト関数であり、各レイヤごとにClean Encoderの各層の出力と比較しています。
 
 ここで一つ注意が必要なのはコスト関数に組み込まれるのはCorrupted Encoderの出力ですが、実際に予測を行う際はClean Encoderの出力が予測結果になります。
