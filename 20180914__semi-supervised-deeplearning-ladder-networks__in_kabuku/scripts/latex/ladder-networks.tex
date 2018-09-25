@@ -265,8 +265,8 @@
 						a_{2,i}^{(l)} \cdot u_i^{(l)} + a_{3,i}^{(l)} \right) + a_{4,i}^{(l)} \cdot u_i^{(l)} + a_{5,i}^{(l)} $ \\
 		$ v_i \left( u_i^{(l)} \right) = a_{6, i}^{(l)} \cdot sigmoid \left(
 						a_{7,i}^{(l)} \cdot u_i^{(l)} + a_{8,i}^{(l)} \right) + a_{9,i}^{(l)} \cdot u_i^{(l)} + a_{10,i}^{(l)} $ \\
-		$C_d	= \sum\limits_{l=0}^{L} C_d^{(l)}
-					= \sum\limits_{l=0}^{L} || \boldsymbol{z}^{(l)} - \boldsymbol{\hat{z}}_{BN}^{(l)} ||^2 $
+		$C_d	= \sum\limits_{l=0}^{L} \lambda_l C_d^{(l)}
+					= \sum\limits_{l=0}^{L} \lambda_l || \boldsymbol{z}^{(l)} - \boldsymbol{\hat{z}}_{BN}^{(l)} ||^2 $
 	};
 \end{tikzpicture}
 
