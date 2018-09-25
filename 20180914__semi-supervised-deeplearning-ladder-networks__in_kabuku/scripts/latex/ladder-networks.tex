@@ -11,13 +11,55 @@
 \usepackage{amsmath}
 
 \begin{document}
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\thispagestyle{empty}
 
 \tikzstyle{inout}=[circle,   draw=blue!50, fill=blue!20, thick, inner sep=0pt,minimum size=6mm]
 \tikzstyle{layer}=[rectangle,draw=black!50,fill=black!20,thick, inner sep=0pt,minimum size=4mm]
-\tikzstyle{pre} =[<-,shorten <=1pt,>=stealth,semithick]
-\tikzstyle{post}=[->,shorten >=1pt,>=stealth,semithick]
+\begin{tikzpicture}[align=center]
+	\node[inout] (input_z)                        {$z$};
+	%
+	\node at (0,1) [layer] (tilde_z_0) {$\boldsymbol{\tilde{z}}^{(0)} = \boldsymbol{x} + noise $};
+	\node at (5,1) [layer] (hat_z_0) {$\boldsymbol{\hat{z}}^{(0)} = g \left( \boldsymbol{\tilde{z}}^{(0)} \right) $};
+	\draw [->] (input_z) to (tilde_z_0);
+	\draw [->] (tilde_z_0) to (hat_z_0);
+	\draw [line width=0.25mm] (hat_z_0) -- (5, 0) -- (input_z);
+	\node[] at (3, -0.4) {$|| \boldsymbol{z} - \boldsymbol{\hat{z}} ||^2 $の最小化};
+\end{tikzpicture}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\thispagestyle{empty}
+
+\tikzstyle{inout}=[circle,   draw=blue!50, fill=blue!20, thick, inner sep=0pt,minimum size=6mm]
+\tikzstyle{layer}=[rectangle,draw=black!50,fill=black!20,thick, inner sep=0pt,minimum size=4mm]
+\begin{tikzpicture}[align=center]
+	\node[inout] (input_z)                        {$z$};
+	%
+	\node at (0,1) [layer] (tilde_z_0) {$\boldsymbol{\tilde{z}}^{(0)} = \boldsymbol{x} + noise $};
+	\draw [->] (input_z) to (tilde_z_0);
+	%
+	\node at (0,2)[layer] (tilde_z_1) {$\boldsymbol{\tilde{z}}^{(1)} = f \left( \tilde{z}^{(0)} \right) $};
+	\draw [->] (tilde_z_0) to (tilde_z_1);
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	\node at (5,2) [layer] (hat_z_1) {$\boldsymbol{\hat{z}}^{(1)} = g \left( \boldsymbol{\tilde{z}}^{(1)} \right) $};
+	\draw [->] (tilde_z_1) -- (hat_z_1);
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	\node at (10,1) [layer] (z_0) {$\boldsymbol{z}^{(0)}$};
+	\draw [line width=0.1mm] (z_0) -- (10, 0) -- (input_z);
+	\node at (10,2) [layer] (z_1) {$\boldsymbol{z}^{(1)} = f \left( \boldsymbol{z}^{(0)} \right) $};
+	\draw [->] (z_0) -- (z_1);
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	\draw [line width=0.5mm] (hat_z_1) -- (z_1);
+	\node[] at (7.5, 1.4) {$|| \boldsymbol{z}^{(1)} - \boldsymbol{\hat{z}}^{(1)} ||^2 $の最小化};
+\end{tikzpicture}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\thispagestyle{empty}
+
+\tikzstyle{inout}=[circle,   draw=blue!50, fill=blue!20, thick, inner sep=0pt,minimum size=6mm]
+\tikzstyle{layer}=[rectangle,draw=black!50,fill=black!20,thick, inner sep=0pt,minimum size=4mm]
 \begin{tikzpicture}[align=center]
 	\tikzstyle{every label}=[red]
 	\tikzstyle{every node}=[font=\scriptsize]
