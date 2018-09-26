@@ -7,6 +7,7 @@ a.jump:before {
 }
 </style>
 
+
 機械学習エンジニアインターン生の杉崎です。今回は**Ladder Network**<sup>[1]</sup>という**半教師あり学習**の手法と実装について書きます。
 
 ## 目次 <a id="toc" class="jump"></a>
@@ -15,6 +16,7 @@ a.jump:before {
 1. <a href="#What_is_Semi-Supervised_Learning">半教師あり学習とは</a>
 1. <a href="#ladder_networks">Ladder Networks</a>
   1. <a href="#ladder_networks_basic_idea">基本的な考え方</a>
+  1. <a href="#root">成り立ち</a>
   1. <a href="#algorithm">アルゴリズム</a>
 1. <a href="#last">感想</a>
 1. <a href="#reference">参考</a>
@@ -50,14 +52,14 @@ a.jump:before {
 最初に入力データを推論しやすい形のデータに変換する手法です。ここでは変換後のデータを**潜在変数**、その座標空間を**潜在空間**とよぶことにします。**オートエンコーダ**(以下スライド34<sup>[5]</sup>)などを用いた半教師あり学習は良い潜在変数を得るために層を学習します。しかし、単層(オートエンコーダ)では表現力が足りず精度が上がらないため、層を深くする研究が行われていました。
 <iframe src="//www.slideshare.net/slideshow/embed_code/key/c6gvjuFIvicPSV?startSlide=34" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; max-width: 100%;" allowfullscreen> </iframe> <div style="margin-bottom:5px"> <strong> <a href="//www.slideshare.net/ssusere55c63/variational-autoencoder-64515581" title="猫でも分かるVariational AutoEncoder" target="_blank">猫でも分かるVariational AutoEncoder</a> </strong> from <strong><a href="//www.slideshare.net/ssusere55c63" target="_blank">Sho Tatsuno</a></strong> </div>
 
-次で紹介する**Ladder Networks**という手法は、**オートエンコーダ(denoising autoencoder, dAE)**や**ソース分割(denoising source separation, DSS)**などの手法を深層学習に応用したものになります。
+次で紹介する**Ladder Networks**という手法は、**デノイジングオートエンコーダ(denoising autoencoder, dAE)**や**デノイジングソース分割(denoising source separation, DSS)**などの手法を深層学習に応用したものになります。
 
 
 ## Ladder Networks <a id="ladder_networks" class="jump"></a>
 2015年に提案<sup>[4]</sup>された**Ladder Networks**という手法を半教師あり学習に応用した内容の論文<sup>[1]</sup>があり、今回はこの内容に沿っていきます。
 
-### 基本的な考え方 <a id="ladder_networks_basic_idea"></a>
-Ladder Networksの潜在変数モデルであり、オートエンコーダ(denoising autoencoder, dAE)やソース分割(denoising source separation, DSS)などのノイズ除去という概念が基礎にあります。
+### 基本的な考え方 <a id="ladder_networks_basic_idea" class="jump"></a>
+Ladder Networksの潜在変数モデルであり、デノイジングオートエンコーダ(denoising autoencoder, dAE)やデノイジングソース分割(denoising source separation, DSS)などのノイズ除去という概念が基礎にあります。
 
 **ノイズ除去(denoising)**とは入力データ(\\(x\\))にあえてノイズを加え(\\(\tilde{x}\\))、
 $$ \tilde{x} = x + noise $$
@@ -71,7 +73,7 @@ $$ x \approx \hat{x} = g( \tilde{x} ) $$
 
 **dAE**の場合は、観測値(\\(l=0\\))のみを使って学習するのに対して、**DSS**では潜在変数である\\(l=1\\)層目の、ノイズ無し出力を\\( z^{(1)} \\)とおいて
 $$ z^{(1)} = f^{(1)}( z^{(0)} ) $$
-となる良い関数\\(f(\cdot)\\)をdenoising関数\\(g(\cdot)\\)を用いて
+となる一層目の関数\\(f(\cdot)\\)で与えます。そして、denoising関数\\(g(\cdot)\\)を用いて
 $$ z^{(1)} \approx \hat{z}^{(1)} = g^{(1)} ( \tilde{z}^{(1)} ) $$
 となるものをコスト\\(C_d^{(1)} = || \hat{z}^{(1)} - z^{(1)} ||^2 \\)の最小化によって求めます。
 このとき、\\(z\\)を標準化することでdenoising関数\\(g(\cdot) = 1\\)となることを防いでいます。
@@ -92,8 +94,21 @@ $$ z^{(l)}  \approx \hat{z}^{(l)} = g( \tilde{z}^{(l)} ) $$
 $$ C_d^{(l)} = || \hat{z}^{(l)} - z^{(l)} ||^2 $$
 
 これを２層のネットワークとして図に表したのが以下の図<sup>[1]</sup>になります。(\\(x\\)はすべて\\(l=0\\)の\\(z^{(l)}\\)と読み替えてください。)
-次の章で詳しく見ていきたいと思います。
+後の節で詳しく見ていきたいと思います。
 <img src='https://lh3.googleusercontent.com/HGsjgfvym36n521rr4QJShaaaK-jsvIoMma5jwNM9l0ANHmErd27Fr9nKxZMhLwXzEdWmIB9_j8PwOgQTgO2D3g=s700'/>
+
+
+### 成り立ち <a id="root" class="jump"></a>
+Ladder Networksの成り立ちは以下のスライド24〜29にわかりやすく図になっています。言葉で表現すると、
+1. [スライド24] 普通のNeurul Netではラベル無しデータを使えず、学習データに過適合し、過学習してしまう
+1. [スライド24] 入力データにノイズを加えることで分離平面をそれぞれのデータ分布から遠くにとることができるようになる
+1. [スライド25] 今までは教師ありデータによるSupervised Lossを計算していたが、Decoderを加えることで教師なしデータを含めたすべての入力データに対してReconstruction Lossを計算でき、ラベル無しデータも学習に取り入れることが可能になった
+1. [スライド26] Decoderにノイズ入り入力データの情報も組み合わせることで入力分布情報を利用したdenoisingが可能になった
+1. [スライド27] 層を深くし、各中間層に対するフィードバックを利用する
+1. [スライド28] 入力だけでなく中間層に対してもノイズを混ぜることで、更にロバストなモデルになる
+1. [スライド29] **Ladder Networks** : 深くした各層のDecode出力に対してReconstruction Lossを計算する
+
+<iframe src="//www.slideshare.net/slideshow/embed_code/key/ste8BJay5zFsO9?startSlide=24" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; max-width: 100%;" allowfullscreen> </iframe> <div style="margin-bottom:5px"> <strong> <a href="//www.slideshare.net/eiichimatsumoto106/nips2015-ladder-network" title="NIPS2015読み会: Ladder Networks" target="_blank">NIPS2015読み会: Ladder Networks</a> </strong> from <strong><a href="https://www.slideshare.net/eiichimatsumoto106" target="_blank">Eiichi Matsumoto</a></strong> </div>
 
 
 ### アルゴリズム <a id=algorithm class="jump"></a>
@@ -102,21 +117,24 @@ $$ C_d^{(l)} = || \hat{z}^{(l)} - z^{(l)} ||^2 $$
 <img src='https://lh3.googleusercontent.com/Il6k6riq8ZB3GYxi4XBn80U55v2DmAKL5YCXHJgOu60ptrhs7KVaGtUUMxj17BKnRL3dvPFRNUKa4eIuSVH40j0=s800'/>
 
 
-[下図の拡大図](https://github.com/pollenjp/article_script/blob/master/20180914__semi-supervised-deeplearning-ladder-networks__in_kabuku/scripts/latex/ladder-networks.pdf)
-<img src='https://lh3.googleusercontent.com/_X0wZ6Y5R1b614bkY0MWA6MGz-MnZQCmsGTBLUlRICOoLVwhMfNhCeY3kWfIvthr0BdDXR1Ww6ua1bWGdLKMMfj7=s1200'/>
+[下図のPDF](https://github.com/pollenjp/article_script/blob/master/20180914__semi-supervised-deeplearning-ladder-networks__in_kabuku/scripts/latex/ladder-networks.pdf)
+<img src='https://lh3.googleusercontent.com/y5ErQOBE0cJ4jRdgkS_e_BoPaMT96ybvf814JeCVNnZosUsk01QAmoiAwNcChkomn7b1nGlRzRyrenbHWOJ9xj4=s1000'/>
 
+ただし、\\(\lambda_l\\)はハイパーパラメータ、\\(m_l\\)は\\(l\\)層目の幅で、\\(\boldsymbol{W}^{(l)}, \boldsymbol{\gamma}^{(l)}, \boldsymbol{\beta}^{(l)}, \boldsymbol{V}^{(l)}, \boldsymbol{a}_i^{(l)} \\)がモデルのパラメータになります。
 
-モデルは上図におけるCorrupted Encoder, Clean Encoder, Decoderの３種類の多層レイヤから成ります。Forwardの計算式は図に書いてあるとおりです。式中の\\(ACT\\),\\(B_N\\)はそれぞれ活性化関数、バッチ標準化処理を表しています。コード中ではrelu関数を活性化関数として用いています。
+モデルは上図におけるCorrupted Encoder, Decoder, Clean Encoderの３種類の多層レイヤから成ります。Forwardの計算式は図に書いてあるとおりです。式中の\\(ACT\\),\\(B_N\\)はそれぞれ活性化関数、バッチ標準化処理を表しています。コード中ではrelu関数を活性化関数として用いています。
+Decoder内のカラー付きの変数は青と赤の矢印が示す通り両隣のEncoderから導出したものです。
 
 モデルの学習中のパラメータ更新のためのコスト関数(損失関数)は以下のように定義されています。(Pはラベルの確率を返し、コードではsoftmax関数を使用しています。)
 $$ C_c = - \frac{1}{N} \sum_{n=1}^{N} \log P \left( \boldsymbol{\tilde{y}} = t(n) | \boldsymbol{x}(n) \right) $$
-$$ C_d = \sum_{l=0}^{L} \lambda_l C_d^{(l)} = \sum_{l=0}^{L} \frac{\lambda_l}{N_{ml}}  \sum_{n=1}^{N} || \boldsymbol{z}^{(l)}(n) - \boldsymbol{\hat{z}}_{BN}^{(l)}(n) ||^2 $$
+$$ C_d = \sum_{l=0}^{L} \lambda_l C_d^{(l)} = \sum_{l=0}^{L} \frac{\lambda_l}{N \cdot m_l}  \sum_{n=1}^{N} || \boldsymbol{z}^{(l)}(n) - \boldsymbol{\hat{z}}_{BN}^{(l)}(n) ||^2 $$
 $$ C   = C_c + C_d $$
 
-\\(C_c\\)の箇所はCorrupted Encoderの出力のコスト関数で正解ラベル\\(t(n)\\)を用いていることからわかるようにこれらはラベル有りデータが入力されたときに使われます。
-\\(C_d\\)はDecoderのコスト関数であり、各レイヤごとにClean Encoderの各層の出力と比較しています。
+\\(C_c\\)の箇所はCorrupted Encoderの出力のコスト関数で正解ラベル\\(t(n)\\)を用いていることからわかるようにこれらはラベル有りデータが入力されたときにのみ計算されます。
+\\(C_d\\)はDecoderのコスト関数 (Reconstruction Loss) であり、各レイヤごとにClean Encoderの各層の出力と比較しています。
+<span style="color:red">つまり、\\(C_c\\)を教師あり学習から求まるコスト関数とし、\\(C_d\\)が教師なし学習から求まるコスト関数になります。</span>
 
-ここで一つ注意が必要なのはコスト関数に組み込まれるのはCorrupted Encoderの出力ですが、実際に予測を行う際はClean Encoderの出力が予測結果になります。
+ここで一つ注意が必要なのはコスト関数に組み込まれるのはCorrupted Encoderの出力ですが、実際に予測を行う際はClean Encoderの出力\\(y\\)が予測結果になることです。
 
 
 ソースコード中におけるEncoder, Decoder はそれぞれ以下の部分に記述されています。EncoderがCorruptedかCleanの差は引数で与えているnoise_stdが0か否かで決まります。
@@ -264,22 +282,21 @@ with tf.name_scope(name="Decoder"):
 
 最終的な分類精度は以下のようになりました。
 
-| 手法 | 精度 |
-|---|---|
+| 手法 | テスト精度 |
+|:---:|:---:|
 | 1 | 98.79 % |
 | 2 | 70.17 % |
 | 3 | 98.01 % |
 
 これより、通常のMLPであれば過学習してしまい精度が上がらないところ、Ladder Networksを用いることですべてのデータを使ったときのMLPの精度と同じくらいの精度が出ていることがわかります。
 
-この他に以下のスライドにはLadder Networksの成り立ちと精度の比較が載っていましたので参考になるかと思います。
+この他に<a href="#root">成り立ち</a>で紹介したスライドには精度の比較が載っており、大変参考になります。
 
-<iframe src="//www.slideshare.net/slideshow/embed_code/key/ste8BJay5zFsO9?startSlide=24" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; max-width: 100%;" allowfullscreen> </iframe> <div style="margin-bottom:5px"> <strong> <a href="//www.slideshare.net/eiichimatsumoto106/nips2015-ladder-network" title="NIPS2015読み会: Ladder Networks" target="_blank">NIPS2015読み会: Ladder Networks</a> </strong> from <strong><a href="https://www.slideshare.net/eiichimatsumoto106" target="_blank">Eiichi Matsumoto</a></strong> </div>
 
 
 ## 感想 <a id="last" class="jump"></a>
 
-今回は半教師あり学習手法としてのLadder Networksについて書きました。元の論文<sup>[1]</sup>の内容は比較的わかりやすく書かれているので読んで見ることをおすすめします。
+今回は半教師あり学習手法としてのLadder Networksについて書きました。元の論文<sup>[1]</sup>の内容は比較的わかりやすく書かれているので読んで見ることをおすすめします。本記事がその一助になれば幸いです。
 
 
 ## 参考 <a id="reference" class="jump"></a>
@@ -301,7 +318,4 @@ with tf.name_scope(name="Decoder"):
 <iframe src="//www.slideshare.net/slideshow/embed_code/key/oCsi4SWrr5XEhw" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; max-width: 100%;" allowfullscreen> </iframe> <div style="margin-bottom:5px"> <strong> <a href="//www.slideshare.net/YuusukeIwasawa/dl-hacks-semisupervised-learning-with-ladder-networks-nips2015" title="[DL Hacks輪読] Semi-Supervised Learning with Ladder Networks (NIPS2015)" target="_blank">[DL Hacks輪読] Semi-Supervised Learning with Ladder Networks (NIPS2015)</a> </strong> from <strong><a href="//www.slideshare.net/YuusukeIwasawa" target="_blank">Yusuke Iwasawa</a></strong> </div>
 
 <iframe src="//www.slideshare.net/slideshow/embed_code/key/c6gvjuFIvicPSV" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; max-width: 100%;" allowfullscreen> </iframe> <div style="margin-bottom:5px"> <strong> <a href="//www.slideshare.net/ssusere55c63/variational-autoencoder-64515581" title="猫でも分かるVariational AutoEncoder" target="_blank">猫でも分かるVariational AutoEncoder</a> </strong> from <strong><a href="//www.slideshare.net/ssusere55c63" target="_blank">Sho Tatsuno</a></strong> </div>
-
-
-
 
