@@ -1,13 +1,13 @@
 機械学習エンジニアインターン生の杉崎です。 今回は時系列データ予測に__一次元畳み込み層__を使用した際の出力の可視化の方法について書きたいと思います。
 
 ## 本記事の目的
-　深層学習における畳込み層は多くは画像等の２次元データに使われることが多いです。そして、ブラックボックスであるモデルに対して理由を明らかにするため、中間層の重みや出力を取り出し可視化する様々な手法が提案されています。(下図)
+　深層学習における畳込み層は多くは画像等の２次元データに使われることが多いです。そして、ブラックボックスであるモデルに対して理由を明らかにするため、__中間層の重みや出力を取り出し可視化__する様々な手法が提案されています。(下図)
 
 <img src='https://lh3.googleusercontent.com/QLrUtiwrt6tLrdUaVyDZP_5mFwN7gDKZFxkQKsAbp_BokA8X_pxoxcbA8mu3OOFX81ZZpBe5ai_HjP48yscWq6M=s600'/>
 [画像引用元](
 https://github.com/raghakot/keras-vis/blob/e019cc43ce6c00b2151941b18dbad63164ad632a/examples/vggnet/activation_maximization.ipynb)
 
-　しかし、そんな中で一次元畳込み層(Conv1d)を用いたモデルでは可視化の事例があまり多くありません。そこで今回はConv1dの重みや中間層の出力の可視化の一例についてご紹介します。
+　しかし、そんな中で__一次元畳込み層(Conv1D)を用いたモデルでは可視化の事例があまり多くありません__。そこで今回はConv1D層の出力の可視化の一例についてご紹介します。
 
 
 ## 目次
@@ -31,8 +31,8 @@ https://github.com/raghakot/keras-vis/blob/e019cc43ce6c00b2151941b18dbad63164ad6
   - 中間層の出力の取得方法
   - `conv1d_1(Conv1D)`の出力の描画
   - チャネル1の描画
-    - 畳み込まずに描画
-    - 畳み込みと描画
+    - (batch, steps) で描画
+    - steps分を足しあわせて描画
   - すべてのチャネルを入力波形と重ねて描画
   - 各チャネルごとに入力波形と重ねて描画
 - 特定のチャネルを削除した予測モデル
@@ -56,7 +56,7 @@ https://github.com/raghakot/keras-vis/blob/e019cc43ce6c00b2151941b18dbad63164ad6
   - サンプル時系列データの作成
   - 一次元畳み込み層を用いた時系列予測モデル作成
 - [visualize_OnlyConv1dModel__SimpleSinFuncWithNoNoise.ipynb](
-    https://github.com/pollenjp/article_script/blob/51b6b8f0f0aed5324fb2588da0bc1397c7f66e08/20180719_visualize_Conv1d_output__in_kabuku/notebooks/visualize_OnlyConv1dModel__SimpleSinFuncWithNoNoise.ipynb)
+    https://github.com/pollenjp/article_script/blob/18ab681bd269b6df71c02746b2a960cec37dea34/20180719_visualize_Conv1d_output__in_kabuku/notebooks/visualize_OnlyConv1dModel__SimpleSinFuncWithNoNoise.ipynb)
   - 中間層Conv1Dの出力を取得と可視化
 - [getLastOutputByChangingHiddenOutput__OnlyConv1dModel__SimpleSinFuncWithNoNoise.ipynb](
     https://github.com/pollenjp/article_script/blob/51b6b8f0f0aed5324fb2588da0bc1397c7f66e08/20180719_visualize_Conv1d_output__in_kabuku/notebooks/getLastOutputByChangingHiddenOutput__OnlyConv1dModel__SimpleSinFuncWithNoNoise.ipynb)
@@ -100,12 +100,12 @@ def toy_func(tStart=0, tStop=100, tStep=1, noiseAmpl=0.05):
 　まず時系列予測を行うConv1dを用いた学習済みモデルが必要なので、サンプルデータとモデルの学習を行います。ソースコードは[こちら](https://github.com/pollenjp/article_script/blob/master/20180719_visualize_Conv1d_output__in_kabuku/notebooks/create_OnlyConv1dModel__SimpleSinFuncWithNoNoise.ipynb)です。
 
 ### 入力データの前処理
-　次にモデルに入力する形に変えてやります。ここで行おうとしているは過去100個分のデータ(ウィンドウサイズ60)を用いてその一つ先のデータを予測する(予測サイズ1)というものです。 以下のGIF動画の示すようにモデルの学習時に与えるデータを入力データと正解データに分けます。 (各ブロックの数字はデータのインデックスです。)
+　次にモデルに入力する形に変えてやります。ここで行おうとしているは過去100個分のデータ(steps100)を用いてその一つ先のデータを予測する(予測サイズ1)というものです。 以下のGIF動画の示すようにモデルの学習時に与えるデータを入力データと正解データに分けます。 (各ブロックの数字はデータのインデックスです。)
 
-<img src='https://lh3.googleusercontent.com/y01oGaRJmawcZoCGlZcORIHqnHEjgr7Y16YESGhMvzm6NMIdT2dToeQbzdmTGK7si_W95AMLigaqCGwtSORsen4=s800'/>
+<img src='https://lh3.googleusercontent.com/2-fFU8BQaMmiI2m9cpGUQMBPOZryVah5x_DWkX2gko5G_ihFNRNlfcECmLy2JB_QibNKJ0Y1LRJv3XPD0BsM-VTq=s800'/>
 
 <br>
-　この処理を行っているコードが以下になります。
+　この処理を行っているコードが以下になります。 プログラムの中ではstepsの箇所をwindowsizeという変数を用いています。
 
 ```python
 >>> #----------------------------------------
@@ -168,7 +168,7 @@ test_y.shape  :  (1900, 1)
 
 ### 予測モデル作成 (Keras)
 　今回はConv1Dを用いた小さめのモデルを作成します。
-　入力や各層の出力の形は`(batch, steps, channels)`のように表されますが、今回は入力のstepsがウィンドウサイズなのでConv1Dの出力stepsもウィンドウサイズと同じ100に設定しています。
+　入力や各層の出力の形は`(batch, steps, channels)`のように表されますが、入力のstepsを維持しています。
 
 
 ```python
@@ -211,6 +211,10 @@ _________________________________________________________________
 
 
 <img src='https://lh3.googleusercontent.com/lnFDiPSgbafIeAtAHcZ0SplrgRV1HycDxu7HxKDVPqy8k7embZsl1yG5tRac2CcBYQeX-5pkG_x3_upqUmMi7oA=s600'/>
+
+　イメージとしては以下の図のようになります。 色の付いているconv1d_1は後ほど可視化する対象です。
+
+<img src='https://lh3.googleusercontent.com/tDCO_9jx9zZALDpzCJa4TVGer5DR3gfHvZpz5BKELbpTvNocdRXR7ZfDRTIMQv0uqGAxW6qyBrcGMtEPmh8C4jY=s800'/>
 
 
 ### モデルの学習
@@ -279,7 +283,7 @@ _________________________________________________________________
 
 ### 入力データの作成と処理
 　`conv1d_1 (Conv1D)`の出力を得るためには一度データを入力する必要がありますので、学習に使用したものと同様に波形を作成します。学習ではt=0〜9,999のデータを使いましたので、ここで入力するデータはt=10,000〜10,300とします。
-　波形サイズ:300、ウィンドウサイズ:100、予測サイズ:1の入力データとします。
+　波形サイズ:300、ステップサイズ:100、予測サイズ:1の入力データとします。
 
 ```python
 >>> tStart = 10000
@@ -329,8 +333,8 @@ input_arr.shape  :  (200, 100, 1)
 ### チャネル1の描画
 　それでは例として8つのチャネル(ch0-ch7)のうち、ch1の描画を行います。 ちなみにch1を取り上げた理由は見た目が分かりやすかったからです。 最終的にはすべて描画します。
 
-#### 畳み込まずに描画
-　最初はconv1d_1(Conv1D)の出力からch0のみを取り出したもの(`(batch, steps, channels)=(200, 100, 1)`)をそのまま描画します。`(x軸, y軸)=(batch, steps)`のようにとれば問題無さそうです。
+#### (batch, steps) で描画
+　最初はconv1d_1(Conv1D)の出力からch1のみを取り出したもの(`(batch, steps, channels)=(200, 100, 1)`)をそのまま描画します。`(x軸, y軸)=(batch, steps)`のようにとれば問題無さそうです。
 
 ```python
 >>> ch = 1
@@ -338,23 +342,23 @@ input_arr.shape  :  (200, 100, 1)
 >>> #--------------------
 >>> # Resize
 >>> #--------------------
->>> weights = hidden_layer_output[:, :, ch].squeeze()
->>> print(weights.shape)
+>>> outputs = hidden_layer_output[:, :, ch].squeeze()
+>>> print(outputs.shape)
 (200, 100)
->>> weights = weights.T
->>> print(weights.shape)
+>>> outputs = outputs.T
+>>> print(outputs.shape)
 (100, 200)
 >>> #--------------------
 >>> # get max value for plot Color
 >>> #--------------------
 >>> #    カラーマップでは値が0に近づくほど無色にしたほうがわかりやすいため, 
 >>> #    最大値と最小値の絶対値のうち最大をとり, それを両極端の色とする.
->>> print("max : ", np.max(weights))
+>>> print("max : ", np.max(outputs))
 max :  3.1358464
->>> print("min : ", np.min(weights))
+>>> print("min : ", np.min(outputs))
 min :  0.0
->>> max_abs = np.maximum(np.max(weights),
-                         abs(np.min(weights))
+>>> max_abs = np.maximum(np.max(outputs),
+                         abs(np.min(outputs))
                         )
 >>> print("max abs : ", max_abs)
 max abs :  3.1358464
@@ -371,7 +375,7 @@ max abs :  3.1358464
 >>> figsize=(14, 7)
 >>> fig = plt.figure(figsize=figsize)
 >>> ax = fig.add_subplot(1,1,1)
->>> mappable = ax.imshow(weights,
+>>> mappable = ax.imshow(outputs,
                          cmap='seismic',  # <-- (min,max)=(blue, red)
                          vmin=-max_abs,
                          vmax=max_abs,
@@ -409,24 +413,24 @@ ax.get_ylim() : (99.5, -0.5)
 >>> plt.show()
 ```
 
-<img src='https://lh3.googleusercontent.com/SF4qJdxdfCkfuFIdAfJKAYEzSeuGRwb0egOYRPyuDHJ_Orft1EvAyyDxgQSJJMTlMN3wCnzuofD-eRe--dOlchs=s750'/>
+<img src='https://lh3.googleusercontent.com/EVK-m3gKx1Wx1DDVTkgBnrk3yqhjakcKkrAOdC8gp7id2B_OWeC1FYa5yqrkNOPfp9ygcLDfmIjMCfRWFXfqaG4=s800'/>
 
 　この結果より右上から左下に同じくらいの値が並んでいます。 これはモデル定義の際にConv1Dのstridesの値がデフォルトで1になっているからです。 各stepが入力として渡した時系列を1つずつずらして畳み込みフィルタに入れているためです。
-　もう少し詳しく説明します。 以下のGIFは入力データ(`(batch, windowsize, feature)=(200, 100, 1)`)を`(batch, windowsize)=(200, 100)`の行列とみた配列です。 四角の中の数字が波形のインデックスであり、カラーマップ同様、右上から左下に同じインデックスが並んでいます。
+　もう少し詳しく説明します。 以下のGIFは入力データ(`(batch, steps, channels)=(200, 100, 1)`)を`(batch, steps)=(200, 100)`の行列とみた配列です。 四角の中の数字が波形のインデックスであり、カラーマップ同様、右上から左下に同じインデックスが並んでいます。
 
-<img src='https://lh3.googleusercontent.com/y01oGaRJmawcZoCGlZcORIHqnHEjgr7Y16YESGhMvzm6NMIdT2dToeQbzdmTGK7si_W95AMLigaqCGwtSORsen4=s800'/>
+<img src='https://lh3.googleusercontent.com/2-fFU8BQaMmiI2m9cpGUQMBPOZryVah5x_DWkX2gko5G_ihFNRNlfcECmLy2JB_QibNKJ0Y1LRJv3XPD0BsM-VTq=s800'/>
 
 
-　この入力データが kernelsize=10, strides=1, padding="same" の畳み込みフィルタを通る様子が以下のGIFになります。 つまり、フィルタを通ったあとのデータは右上から左下にかけて同じ波形のデータを入力とした出力になります。 これが先ほどのカラーマップの特徴の理由です。 (正確に言えば、両端の、パディングを含んでいる箇所の畳み込みは取り込むパディングの数が違うので一致はしませんが近い値になります。)
+　この入力データが __kernelsize=10, strides=1, padding="same"__ の畳み込みフィルタを通る様子が以下のGIFになります(このときのpaddingは入力データの左右に__5個__ずつデータを加えると出力サイズが同じ(__same__)になります)。 つまり、フィルタを通ったあとのデータは右上から左下にかけて同じ波形のデータを入力とした出力になります。 これが先ほどのカラーマップの特徴の理由です。 (正確に言えば、両端の、パディングを含んでいる箇所の畳み込みは取り込むパディングの数が違うので一致はしませんが近い値になります。)
 
 <img src='https://lh3.googleusercontent.com/y-td25eWNu0VUxBoOi5EnX-9vmjcQ62UD0ex9WRHK7xZoCeb5n6GNwgHQbuuLKVI4fSpyeCLL8BbL7iAUB190Maw=s600'/>
 
 
 
-#### 畳み込んで描画
-　上の結果を見る限り各stepsを別々に考えることにはあまり意味はありません。 そこで斜めの値の和あるいは平均などの形で一つにまとめます(ここではこの処理を__畳み込む__と表現します)。 今回は和を取ってまとめようと思いますが、以下の図のオレンジの箇所が足りないので値を複製して埋めます。 (プログラムでは畳み込みの出力を転置して扱ったほうがわかりやすいため図でも転置されていることに注意してください。)
+#### steps分を足しあわせて描画
+　上の結果を見る限り__各stepsを別々に考えることにはあまり意味はありません__。 そこで斜めの値の和あるいは平均などの形で一つにまとめます。 ここではsteps分を足しあわせて一つの値にしています。 今回は__和__を取ってまとめようと思いますが、__以下の図のオレンジの箇所は足りないので値を複製__して埋めます(詳細はコードを確認してください)。 プログラムでは畳み込みの出力(行列)を転置して扱ったほうがわかりやすいため転置されていることに注意してください。
 
-<img src='https://lh3.googleusercontent.com/_DqaQ_npCbO8__0NB-Gj7oXMnAcWJv7bOoIoFzt_bN80t8UhSNhGMrC1PHlyCHRXXEmnReIfRZHXN3MkhzitqOKg=s800'/>
+<img src='https://lh3.googleusercontent.com/eJ7wXVAA8za7rpQbiRqQaSNEznOYcHYnfvpbPWW-Jqw73B2vK07qaIvpWC4uMhePpZeF-40sXRggSVV_qoSsnR0=s800'/>
 
 プログラムコードは以下のように書くことで steps を一つにまとめることができます。
 
@@ -443,50 +447,50 @@ ax.get_ylim() : (99.5, -0.5)
 >>> #----------------------------------------
 >>> # Convolved window size
 >>> #----------------------------------------
->>> weights_tmp = hidden_layer_output[:, :, ch].squeeze()
->>> weights_tmp = weights_tmp.T
+>>> outputs_tmp = hidden_layer_output[:, :, ch].squeeze()
+>>> outputs_tmp = outputs_tmp.T
 
 >>> # Prepare for convolved
->>> weights = np.empty(shape=(0, wave_size - predictsize))
+>>> outputs = np.empty(shape=(0, wave_size - predictsize))
 >>> for window_idx in range(windowsize):
-        _shape = weights_tmp.shape[1]
+        _shape = outputs_tmp.shape[1]
         # append last
         if window_idx < windowsize-1:
-            _val = weights_tmp[-1, -windowsize+window_idx+1:]
-            insert_arr = np.append(arr=weights_tmp[window_idx],
+            _val = outputs_tmp[-1, -windowsize+window_idx+1:]
+            insert_arr = np.append(arr=outputs_tmp[window_idx],
                                    values=_val,
                                    axis=None)
         else:
-            insert_arr = weights_tmp[window_idx]
+            insert_arr = outputs_tmp[window_idx]
     
         # insert first
-        _val = weights_tmp[0, :window_idx]
+        _val = outputs_tmp[0, :window_idx]
         insert_arr = np.insert(arr=insert_arr,
                                obj=[0 for i in range(window_idx)],
                                values=_val,
                                ).reshape(1, -1)
         # append to the array
-        #print(weights.shape)
+        #print(outputs.shape)
         #print(insert_arr.shape)
-        weights = np.append(
-            arr=weights,
+        outputs = np.append(
+            arr=outputs,
             values=insert_arr,
             axis=0,
         )
->>> print("weights.shape : ", weights.shape)
-weights.shape :  (100, 299)
+>>> print("outputs.shape : ", outputs.shape)
+outputs.shape :  (100, 299)
 
 >>> # Convolved
->>> weights_convolve_windows = weights.sum(axis=0).reshape(1, -1)
->>> print("weights_convolve_windows.shape : ", weights_convolve_windows.shape)
-weights_convolve_windows.shape :  (1, 299)
+>>> outputs_convolve_windows = outputs.sum(axis=0).reshape(1, -1)
+>>> print("outputs_convolve_windows.shape : ", outputs_convolve_windows.shape)
+outputs_convolve_windows.shape :  (1, 299)
 ```
 
-　steps を一つにまとめたあと(`weights_convolve_windows`) では、100だったstepsが1になっていることがわかります。 これを描画したものが下図です。
+　steps を一つにまとめたあと(`outputs_convolve_windows`) では、100だったstepsが1になっていることがわかります。 これを描画したものが下図です。
 
 <img src='https://lh3.googleusercontent.com/OVtm_AqAhyP3xNBCXrnRr98EIP_m5G54WQqglkzfvnBJ7ef8OR58PSxVOqVwg4Dxuwj0z2AN4agIbV7J2TL0nTN8=s750'/>
 
-　横軸は0-298の299個あり、これは入力に使用した0-298の波形データ数と一致しています。 これより元の波形と重ねて表示することができます。(下図)
+　横軸は0-298の299個あり、これは入力に使用した0-298の波形データ数と一致させています。 これより元の波形と重ねて表示することができます。(下図)
 
 <img src='https://lh3.googleusercontent.com/4T2B21q7zDBA7GBjdL5IyWfBGX2LpAM5pWu3NSWBXXktZNaVsGZRbWJlFhGVNxShRNGxZ5AG7Bd2EZZ41h970DA=s800'/>
 
@@ -495,8 +499,7 @@ weights_convolve_windows.shape :  (1, 299)
 　他のチャネルについても表示します。(下図)
 　全体を表示してみると ch0 と ch7 がほとんど寄与していないことがわかります。 また、各チャネルごとに波形のなかで注目している箇所が異なることもわかると思います。
 
-<img src='https://lh3.googleusercontent.com/ResppzksmWFPscD1zYVBQjAnpFMVv_aJv75XaBODM0QtOWkMno8HF5ma3nrVC26Xei0Il17SrScfkeTvfQ6OpA=s800'/>
-
+<img src='https://lh3.googleusercontent.com/wBhEuEbkRjoJoN8HD5ebDQKW0a77omXIZcXhYdGFCTjKJlrddVZA_-IXeQLckADpvETY0cWrClEQXgNN9iSGXA=s800'/>
 
 ### 各チャネルごとに入力波形と重ねて描画
 　具体的にどの箇所でどのチャネルが反応しているのかをわかりやすくなるように分けて描画します(下図)。 すると、いくつかの特徴を把握できます。
@@ -510,14 +513,14 @@ weights_convolve_windows.shape :  (1, 299)
 
 
 ## 特定のチャネルを削除した予測モデル
-　今まででの方法では中間層の出力値からどのチャネルの出力値が高いかということしかわかりません。 そこであるチャネルを削除したときのMSE(二乗和誤差)をもとに重要度を選別することができます。 特定のチャネルを削除するということは、中間層における出力から特定のチャネルの値をすべて0にして次の層に渡すことであるとみなすことができます。
-　今回は以下のように`conv1d_1(Conv1D)`の出力のチャネルを削除して次の層に渡します。
+　今まででの方法では中間層の出力値から__どのチャネルの出力値が高いか__ということしかわかりません。 そこで__具体的にどのチャネルが重要であるか__を判定するために、あるチャネルを削除したときの__MSE(二乗和誤差)__の利用を考えてみます。 特定のチャネルを削除するということは、中間層における出力から特定のチャネルの値をすべて0にして次の層に渡すことであるとみなすことができます。
+　今回は以下のように`conv1d_1(Conv1D)`の出力のチャネルを削除して次の層に渡しています。
 
 <img src='https://lh3.googleusercontent.com/NLrSbNsvngmKMbDzZLRh-H9Ep0vllB9Ew62kCoXFMukI_EHzNyy9QcuQMml7mMIfEbmfDSw3TpdJW3rNmRfU93ae=s800'/>
 
 
 ### 2つのチャネルを削除
-　8チャネルのうち2つのチャネルの削除する場合の数は28通りなので全組み合わせについて試します。 正解波形と予測波形の比較とMSE(二乗和誤差)のカラーマップ表示を行います。
+　8チャネルのうち2つのチャネルの削除する場合の数は__28通り__なので全組み合わせについて試してみます。 正解波形と予測波形の比較とMSE(二乗和誤差)のカラーマップ表示を行います。
 
 　以下の関数は`channel_index`に与えたチャネルを取り除いた結果を返してくれます。
 
@@ -586,15 +589,17 @@ def removeIntermidiateChannels(input_array, model, layer_index=0, channel_index=
 >>> plt.show()
 ```
 
+これらの図は全体で、__左から順にch0-ch7__を、__上から順にch0-ch7__を削除したものです。 よって、右上と左下の図は対称的になっています。
+
 [拡大図リンク](https://raw.githubusercontent.com/pollenjp/article_script/74de49cfa138e74ccdbdd5a9760d5ce999764708/20180719_visualize_Conv1d_output__in_kabuku/data/plot_images/getLastOutputByChangingHiddenOutput__OnlyConv1dModel__SimpleSinFuncWithNoNoise__Remove2Channels.png)
 
 <img src='https://lh3.googleusercontent.com/3qNr8hEzO7lYo8idlUipli0t3xBZ90Uuv_LefNyuBYhBoohsNTKR58xP7xZ-7dVWpanKufUuoWtnmJ_rhewgEkM=s600'/>
 
-　これにより視覚的にずれの大きいものやずれ方の特徴などをつかむことができます。 よりズレが大きいほどそのとき削除したチャネルの役割が大きかったと言えます。
+　これにより__視覚的__に__ずれの大きいもの__や__ずれ方の特徴__などをつかむことができます。 __よりズレが大きいほどそのとき削除したチャネルの役割が大きかった__と言えます。
 
 
 #### MSE(二乗和誤差)のカラーマップ表示
-　視覚的情報だけではズレを正しく判断できないときがあるので、評価指標として__MSE(二乗和誤差)__を用います。 先ほどの描画の際に`mse_remove2ch`にMSEの値を保存しておいたのでカラーマップ表示によってMSEの大きなものをすぐに確認できます。
+　視覚的情報だけではズレを正しく判断できないときがあるので、評価指標として__MSE(二乗和誤差)__を用います。 先ほどの描画の際に`mse_remove2ch`にMSEの値を保存しておいたのでカラーマップ表示によってMSEの大きいものをすぐに確認できます。
 
 ```python
 >>> #--------------------
@@ -636,7 +641,7 @@ max abs :  0.4231775843779829
 <img src='https://lh3.googleusercontent.com/hIAFepJ4AQbzlME6nNTSmDXRlTbHX1AGHe6Ppyha0Co72xJERCKbZ25e5PqQKiMxh35e7a6alZzXxhe3LnIzfdY=s600'/>
 
 
-　この結果より`(ch1, ch3), (ch2, ch3)`のペアが特に重要度が高く、全体的には`ch3`が大きく寄与していることが把握できます。
+　この結果よりMSEが大きいペアである`(ch1, ch3), (ch2, ch3)`の重要度が高く、全体的には`ch3`が大きく寄与していることが把握できます。
 
 
 ## 最後に
@@ -649,6 +654,5 @@ max abs :  0.4231775843779829
 - <a href="https://qiita.com/niisan-tokyo/items/a94dbd3134219f19cab1">時系列予測を一次元畳み込みを使って解く with Keras - Qiita</a>
 - <a href="http://roomba.hatenablog.com/entry/2017/04/21/154954">TensorFlowでのSoftmax回帰の実装・可視化・識別器の騙し方 - roombaの日記</a>
 - <a href="https://www.analyticsvidhya.com/blog/2018/03/essentials-of-deep-learning-visualizing-convolutional-neural-networks/">Essentials of Deep Learning: Visualizing Convolutional Neural Networks in Python</a>
-
 
 
