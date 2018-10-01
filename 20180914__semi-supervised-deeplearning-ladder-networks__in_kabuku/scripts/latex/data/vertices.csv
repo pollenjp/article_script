@@ -1,0 +1,6 @@
+id        ,  x ,   y, size, shape    , color , opacity, IdAsLabel, NoLabel, Math, label
+         x,   0,   0,   .5,    circle,    red,      .3,     false,   false, true, x
+ tilde_z_0,   0,   1,   .5, rectangle,       ,      .3,     false,   false, true, \\tilde{z}^{(0)}
+         C,   0,   2,   .5, rectangle,       ,      .3,     false,   false, true, \\tilde{z}^{(1)}
+         D,   0,   3,   .5, rectangle,       ,      .3,     false,   false, true, \\tilde{z}^{(2)}
+         E,   0,   4,   .5, rectangle,       ,      .3,     false,   false, true, \\tilde{z}^{(3)}
